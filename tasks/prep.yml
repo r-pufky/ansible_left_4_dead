@@ -1,0 +1,60 @@
+---
+# yamllint disable rule:line-length
+###############################################################################
+# Prep
+###############################################################################
+# Service may not exist if first install.
+
+- name: 'Prep | assert required sourcemod options'
+  when: left_4_dead_srv_sourcemod_enable
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - left_4_dead_srv_sourcemod_branch | length > 0
+      - left_4_dead_srv_sourcemod_build | length > 0
+    fail_msg: |
+      ╭───────────────────────────────────────────────────────────────────╮
+      │                                                                   │
+      │           Enabling sourcemod requires branch and build.           │
+      │                                                                   │
+      ├───────────────────────────────────────────────────────────────────╯
+      │ left_4_dead_srv_sourcemod_branch: {{ left_4_dead_srv_sourcemod_branch }}
+      │ left_4_dead_srv_sourcemod_build: {{ left_4_dead_srv_sourcemod_build }}
+
+- name: 'Prep | assert required metamod options'
+  when: left_4_dead_srv_metamod_enable
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - left_4_dead_srv_metamod_branch | length > 0
+      - left_4_dead_srv_metamod_build | length > 0
+    fail_msg: |
+      ╭───────────────────────────────────────────────────────────────────╮
+      │                                                                   │
+      │            Enabling metamod requires branch and build.            │
+      │                                                                   │
+      ├───────────────────────────────────────────────────────────────────╯
+      │ left_4_dead_srv_metamod_branch: {{ left_4_dead_srv_metamod_branch }}
+      │ left_4_dead_srv_metamod_build: {{ left_4_dead_srv_metamod_build }}
+
+- name: 'Prep | assert required admin options'
+  when: left_4_dead_cfg_admins | length > 0
+  ansible.builtin.assert:
+    quiet: true
+    that: left_4_dead_srv_sourcemod_enable
+    fail_msg: |
+      ╭───────────────────────────────────────────────────────────────────╮
+      │                                                                   │
+      │             Simple admins require sourcemod enabled.              │
+      │                                                                   │
+      ├───────────────────────────────────────────────────────────────────╯
+      │ left_4_dead_srv_sourcemod_enable: {{ left_4_dead_srv_sourcemod_enable }}
+      │ left_4_dead_cfg_admins: {{ left_4_dead_cfg_admins }}
+
+- name: 'Prep | stop services'
+  ansible.builtin.systemd:
+    name: 'Install | {{ item }}'
+    state: 'stopped'
+  failed_when: false
+  loop:
+    - 'left_4_dead.service'

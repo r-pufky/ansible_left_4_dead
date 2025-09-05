@@ -1,0 +1,102 @@
+---
+###############################################################################
+# Install
+###############################################################################
+# Install location is relative to base installation directory. This is **NOT**
+# customizable, contrary to many mis-documented Internet configurations.
+#
+# server.cfg must be located in left4dead/cfg and can only be referenced on
+# start using the relative path from that location (server.cfg).
+#
+# Generates:
+#   _left_4_dead: dict - Role runtime specific config.
+#
+# Reference:
+# * https://github.com/r-pufky/steam/blob/master/docs/examples/left-4-dead.md
+# * https://wiki.alliedmods.net/Installing_Metamod:Source
+# * https://wiki.alliedmods.net/Installing_SourceMod
+
+- name: 'Install | steamcmd'
+  ansible.builtin.import_role:
+    name: 'r_pufky.game.steam'
+  vars:
+    steam_srv_metamod_enable: '{{ left_4_dead_srv_metamod_enable }}'
+    steam_srv_metamod_branch: '{{ left_4_dead_srv_metamod_branch }}'
+    steam_srv_metamod_build: '{{ left_4_dead_srv_metamod_build }}'
+    steam_srv_sourcemod_enable: '{{ left_4_dead_srv_sourcemod_enable }}'
+    steam_srv_sourcemod_branch: '{{ left_4_dead_srv_sourcemod_branch }}'
+    steam_srv_sourcemod_build: '{{ left_4_dead_srv_sourcemod_build }}'
+
+- name: 'Install | cache steam user'
+  ansible.builtin.set_fact:
+    _left_4_dead:
+      user: '{{ _steam_srv_user.raw }}'
+      uid: '{{ _steam_srv_user.role_uid }}'
+      group: '{{ _steam_srv_group.raw }}'
+      gid: '{{ _steam_srv_group.role_gid }}'
+      home: '{{ _steam_srv_user.role_home }}'
+      base: '{{ left_4_dead_srv_root ~ "/left4dead" }}'
+      config: '{{ left_4_dead_srv_root ~ "/left4dead/cfg" }}'
+      sm_admin_config: '{{
+          left_4_dead_srv_root ~
+          _steam_srv_sourcemod_enable.role_dirs[0] ~
+          "/configs/admins_simple.ini" }}'
+
+- name: 'Install | create {{ left_4_dead_srv_root }}'
+  ansible.builtin.file:
+    path: '{{ left_4_dead_srv_root }}'
+    owner: '{{ _left_4_dead.uid }}'
+    group: '{{ _left_4_dead.gid }}'
+    mode: '0755'
+    state: 'directory'
+
+- name: 'Install | updating server 🗘'
+  when: left_4_dead_srv_update_server
+  ansible.builtin.debug:
+    msg: |
+      ╭───────────────────────────────────────────────────────────────────╮
+      │                                                                   │
+      │      Server is being updated. This will take a few minutes.       │
+      │                                                                   │
+      ├───────────────────────────────────────────────────────────────────╯
+      │ ~7.5GB to synchronize.
+
+- name: 'Install | update server {{ left_4_dead_role_app_id }}'
+  when: left_4_dead_srv_update_server
+  ansible.builtin.shell: >-
+    /usr/games/steamcmd
+    +@sSteamCmdForcePlatformType {{ left_4_dead_role_platform }}
+    +force_install_dir {{ left_4_dead_srv_root }}
+    +login anonymous
+    +app_update {{ left_4_dead_role_app_id }}
+    {{ left_4_dead_srv_extra_opts }}
+    +quit
+  args:
+    executable: '/bin/bash'
+    chdir: '{{ _left_4_dead.home }}'
+  changed_when: false
+  become: true
+  become_user: '{{ _left_4_dead.user }}'
+
+- name: 'Install | metamod'
+  ansible.builtin.include_tasks: 'source_mod.yml'
+  vars:
+    mod: 'metamod'
+    src: '{{ _steam_srv_metamod_enable.role_archive_path }}'
+    dest: '{{ left_4_dead_srv_root }}'
+    version: '{{ _steam_srv_metamod_enable.role_version }}'
+    dirs: '{{ _steam_srv_metamod_enable.role_dirs }}'
+    files: '{{ _steam_srv_metamod_enable.role_files }}'
+    enable: '{{ left_4_dead_srv_metamod_enable }}'
+
+# Always install sourcemod after metamod; sourcemod places files in metamod.
+- name: 'Install | sourcemod'
+  ansible.builtin.include_tasks: 'source_mod.yml'
+  vars:
+    mod: 'sourcemod'
+    src: '{{ _steam_srv_sourcemod_enable.role_archive_path }}'
+    dest: '{{ left_4_dead_srv_root }}'
+    version: '{{ _steam_srv_sourcemod_enable.role_version }}'
+    dirs: '{{ _steam_srv_sourcemod_enable.role_dirs }}'
+    files: '{{ _steam_srv_sourcemod_enable.role_files }}'
+    enable: '{{ left_4_dead_srv_sourcemod_enable }}'
