@@ -53,7 +53,7 @@
 
 - name: 'Prep | stop services'
   ansible.builtin.systemd:
-    name: 'Install | {{ item }}'
+    name: '{{ item }}'
     state: 'stopped'
   failed_when: false
   loop:
