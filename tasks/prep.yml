@@ -1,60 +1,45 @@
 ---
-# yamllint disable rule:line-length
 ###############################################################################
-# Prep
+# Pre Execution Tasks
 ###############################################################################
+# Only use data annotations in role after merging role, defaults, runtime data.
 # Service may not exist if first install.
 
-- name: 'Prep | assert required sourcemod options'
-  when: left_4_dead_srv_sourcemod_enable
+- name: 'Prep | fact | record start time'
+  ansible.builtin.set_fact:
+    left_4_dead__srv: "{{ left_4_dead___release | r_pufky.data.v3(
+
+        _start=now(utc=True, fmt='%Y-%m-%dT%H%M%S'),
+        _mod_branch=left_4_dead_srv_mod_branch,
+        _mm_build=left_4_dead_srv_mm_build,
+        _sm_build=left_4_dead_srv_sm_build,
+
+        _update_opts=left_4_dead_srv_update_opts | join(' '),
+        _launch_opts=left_4_dead_srv_launch_opts | join(' '),
+      ) }}"
+    left_4_dead__cfg: "{{ left_4_dead___app | r_pufky.data.v3(
+
+        _host=left_4_dead_cfg_host,
+        _motd=left_4_dead_cfg_motd,
+        _server=left_4_dead_cfg_server,
+        _admins=left_4_dead_cfg_admins,
+      ) }}"
+
+- name: 'Prep | assert | admins enabled and sourcemod installed'
+  when: left_4_dead__cfg._admins | length > 0
   ansible.builtin.assert:
     quiet: true
     that:
-      - left_4_dead_srv_sourcemod_branch | length > 0
-      - left_4_dead_srv_sourcemod_build | length > 0
+      - left_4_dead_flg_sourcemod
     fail_msg: |
-      ╭───────────────────────────────────────────────────────────────────╮
-      │                                                                   │
-      │           Enabling sourcemod requires branch and build.           │
-      │                                                                   │
-      ├───────────────────────────────────────────────────────────────────╯
-      │ left_4_dead_srv_sourcemod_branch: {{ left_4_dead_srv_sourcemod_branch }}
-      │ left_4_dead_srv_sourcemod_build: {{ left_4_dead_srv_sourcemod_build }}
 
-- name: 'Prep | assert required metamod options'
-  when: left_4_dead_srv_metamod_enable
-  ansible.builtin.assert:
-    quiet: true
-    that:
-      - left_4_dead_srv_metamod_branch | length > 0
-      - left_4_dead_srv_metamod_build | length > 0
-    fail_msg: |
-      ╭───────────────────────────────────────────────────────────────────╮
-      │                                                                   │
-      │            Enabling metamod requires branch and build.            │
-      │                                                                   │
-      ├───────────────────────────────────────────────────────────────────╯
-      │ left_4_dead_srv_metamod_branch: {{ left_4_dead_srv_metamod_branch }}
-      │ left_4_dead_srv_metamod_build: {{ left_4_dead_srv_metamod_build }}
+      ✘ Simple admins require sourcemod enabled.
 
-- name: 'Prep | assert required admin options'
-  when: left_4_dead_cfg_admins | length > 0
-  ansible.builtin.assert:
-    quiet: true
-    that: left_4_dead_srv_sourcemod_enable
-    fail_msg: |
-      ╭───────────────────────────────────────────────────────────────────╮
-      │                                                                   │
-      │             Simple admins require sourcemod enabled.              │
-      │                                                                   │
-      ├───────────────────────────────────────────────────────────────────╯
-      │ left_4_dead_srv_sourcemod_enable: {{ left_4_dead_srv_sourcemod_enable }}
-      │ left_4_dead_cfg_admins: {{ left_4_dead_cfg_admins }}
+      left_4_dead_flg_sourcemod: {{ left_4_dead_flg_sourcemod }}
+      left_4_dead_cfg_admins: {{ left_4_dead__cfg._admins }}
 
-- name: 'Prep | stop services'
+- name: 'Prep | systemd | stop left_4_dead.service'
   ansible.builtin.systemd:
-    name: '{{ item }}'
+    name: 'left_4_dead.service'
     state: 'stopped'
   failed_when: false
-  loop:
-    - 'left_4_dead.service'

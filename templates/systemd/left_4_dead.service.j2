@@ -1,0 +1,22 @@
+[Unit]
+Description=Left 4 Dead Dedicated Server.
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+{% if left_4_dead_flg_update %}
+ExecStartPre={{ left_4_dead__cfg._steamcmd }} +app_update {{ left_4_dead__srv._app_id }} {{ left_4_dead__srv._update_opts }} +quit
+{% endif %}
+ExecStart={{ left_4_dead__cfg._app }} +console +game left4dead {{ left_4_dead__srv._launch_opts }} +exec server.cfg +pidfile /tmp/left_4_dead.pid
+WorkingDirectory={{ left_4_dead__cfg._root_dir }}
+PidFile=/run/left_4_dead.pid
+TimeoutStartSec=infinity
+Restart=always
+# limitNOFILE default is 524288 in Trixie.
+Environment="LD_LIBRARY_PATH={{ left_4_dead__cfg._root_dir }}:{{ left_4_dead__cfg._root_dir }}/bin"
+User={{ steam__ctx._user }}
+Group={{ steam__ctx._group }}
+
+[Install]
+WantedBy=multi-user.target

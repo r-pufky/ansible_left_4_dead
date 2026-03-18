@@ -4,7 +4,7 @@
 ###############################################################################
 # Manage firewall with r_pufky.deb.ufw.
 
-left_4_dead_srv_ports:
+left_4_dead_ports:
   - proto: 'udp'
     from_ip: 'any'
     to_port: 27015

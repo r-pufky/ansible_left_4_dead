@@ -1,39 +1,40 @@
 # Left 4 Dead
 Left 4 Dead dedicated server.
 
-## Requirements
-[supported platforms](https://github.com/r-pufky/ansible_left_4_dead/blob/main/meta/main.yml)
+## [Requirements][i]
+Requires [r_pufky.game][g] galaxy-ng collection.
 
-Resource | Minimum | Recommended
----------|---------|-------------------------------
-CPU      | 2c/2t   | 4c/8t@2.8Ghz
-RAM      | 2GB     | 4GB
-Disk     | 7.5GB   | 10GB (without additional mods)
+  Resource | Minimum | Recommended
+ ----------|---------|-------------
+  CPU      | 2c/2t   | 4c/8t @2.8Ghz
+  RAM      | 2GB     | 4GB
+  Disk     | 7.5GB   | 10GB (without additional mods)
 
 ## Role Variables
-[defaults](https://github.com/r-pufky/ansible_left_4_dead/tree/main/defaults/main)
+Detailed variable use documented in defaults. See usage for role operation.
 
-### Ports
-All ports and protocols have been defined for the role.
+* [defaults][j] - User configurable options.
 
-[defaults/ports.yml](https://github.com/r-pufky/ansible_left_4_dead/blob/main/defaults/main/ports.yml)
+* [ports][k] - Ports are **not** managed (defined for external use).
 
-## Dependencies
-**galaxy-ng** roles cannot be used independently. Part of
-[r_pufky.game](https://github.com/r-pufky/ansible_collection_game) collection.
+## Usage
 
-## Example Playbook
-Read defaults documentation.
+### Feature Flags
+Tasks are gated by feature flags and executed in the following order.
 
-The following example will get an instance quickly up and running. Server will
-be created using the steamcmd user from `r_pufky.game.steam` and install both
-metamod and sourcmod; granting admin privileges.
+  Step | Flag                      | Notes
+ ------|---------------------------|-------
+  1    | left_4_dead_flg_update    | Update server on launch or if already installed.
+  2    | left_4_dead_flg_config    | Set configuration files.
+  3    | left_4_dead_flg_metamod   | Install Metamod.
+  3    | left_4_dead_flg_sourcemod | Install Sourcemod.
+
+### Example Playbooks
+
 ``` yaml
-- name: 'Left 4 Dead server'
-  hosts: 'l4d.example.com'
-  become: true
-  roles:
-     - 'r_pufky.game.left_4_dead'
+- name: 'Left 4 Dead Server with metamod, sourcemod and admin users.'
+  ansible.builtin.include_role:
+     name: 'r_pufky.game.left_4_dead'
   vars:
     left_4_dead_cfg_host: 'My host message.'
     left_4_dead_cfg_motd: 'Have fun!'
@@ -79,36 +80,26 @@ metamod and sourcmod; granting admin privileges.
         priv: '99:z'  # Root privileges.
 ```
 
-Changes updating the configuration only can be done to speed role application:
-``` bash
-ansible-playbook site.yml --tags l4d \
-  -e '{"left_4_dead_srv_update_server": false}'
-```
-
 ## Development
-Configure [environment](https://r-pufky.github.io/ansible_collection_docs/ansible/environment)
+Configure [environment][a].
 
-Run all unit tests:
 ``` bash
+# Run all tests.
 molecule test --all
 ```
 
-### Releases
-Release format: **{OS}-{SERVICE}-{ROLE}**
+Testing variables:
 
-Each type inherits the versioning system used; defaulting to schematic
-versioning.
+  Variable          | type | Description
+ -------------------|------|-------------
+  url_inject_enable | bool | Disable **get_url** to inject files locally.
 
-`12.0.0-2.0.3-1.0.0`
+### [Releases][b]
 
-* 12.0.0 - Debian 12 (bookworm).
-* 2.0.3 - Service/app version.
-* 1.0.0 - Role version.
-
-Releases are branched on Debian releases:
-
-* **[13.x.x](https://github.com/r-pufky/ansible_left_4_dead)**: 13 Trixie.
-* **[12.x.x](https://github.com/r-pufky/ansible_left_4_dead/tree/12.x)**: 12 Bookworm.
+  Release | Debian | Ansible | Notes
+ ---------|--------|---------|-------
+  2.x.x   | 13     | 2.20    | Ansible 2.20, feature flags, and semantic versioning.
+  1.x.x   | 12     | 2.11    | Migration from private repository.
 
 ## Issues
 Create a bug and provide as much information as possible.
@@ -116,9 +107,20 @@ Create a bug and provide as much information as possible.
 Associate pull requests with a submitted bug.
 
 ## License
-[AGPL-3.0 License](https://www.tldrlegal.com/license/gnu-affero-general-public-license-v3-agpl-3-0)
- [(direct link)](https://github.com/r-pufky/ansible_left_4_dead/blob/main/LICENSE)
+[AGPL-3.0 License][c] | [direct link][f]
 
 ## Author Information
-PGP Fingerprint: [466EEC2B67516C7117C85CE3A0BC35D16698BAB9](https://keys.openpgp.org/vks/v1/by-fingerprint/466EEC2B67516C7117C85CE3A0BC35D16698BAB9)
-| [github gist](https://gist.github.com/r-pufky/a8df36977c55b5bb20829267c4c49d22)
+PGP: [466EEC2B67516C7117C85CE3A0BC35D16698BAB9][d] | [github gist][e]
+
+
+[a]: https://r-pufky.github.io/ansible_docs
+[b]: https://semver.org/spec/v2.0.0
+[c]: https://www.tldrlegal.com/license/gnu-affero-general-public-license-v3-agpl-3-0
+[d]: https://keys.openpgp.org/vks/v1/by-fingerprint/466EEC2B67516C7117C85CE3A0BC35D16698BAB9
+[e]: https://gist.github.com/r-pufky/a8df36977c55b5bb20829267c4c49d22
+
+[f]: https://github.com/r-pufky/ansible_left_4_dead/blob/main/LICENSE
+[g]: https://github.com/r-pufky/ansible_collection_game
+[i]: https://github.com/r-pufky/ansible_left_4_dead/blob/main/meta/main.yml
+[j]: https://github.com/r-pufky/ansible_left_4_dead/tree/main/defaults/main/main.yml
+[k]: https://github.com/r-pufky/ansible_left_4_dead/blob/main/defaults/main/ports.yml

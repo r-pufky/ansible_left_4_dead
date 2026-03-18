@@ -1,0 +1,34 @@
+---
+###############################################################################
+# Install
+###############################################################################
+# Install location is relative to base installation directory. This is **NOT**
+# customizable, contrary to many mis-documented Internet configurations.
+#
+# server.cfg must be located in left4dead/cfg and can only be referenced on
+# start using the relative path from that location (server.cfg).
+#
+# Reference:
+# * https://github.com/r-pufky/steam/blob/master/docs/examples/left-4-dead.md
+# * https://wiki.alliedmods.net/Installing_Metamod:Source
+# * https://wiki.alliedmods.net/Installing_SourceMod
+
+- name: 'Update | steamcmd | 🗘 updating server (7.5GB, ~5 minutes) 🗘'
+  ansible.builtin.debug:
+    msg: |
+
+      🗘 Updating ~7.5GB (~5 minutes @ 200Mbps). 🗘
+
+- name: '{{ "Update | steamcmd | update " ~ left_4_dead__srv._app_id }}'
+  ansible.builtin.shell: '{{
+      left_4_dead__cfg._steamcmd ~
+      "+app_update " ~ left_4_dead__srv._app_id ~ " " ~
+      left_4_dead__srv._update_opts ~ " " ~
+      "+quit"
+    }}'
+  args:
+    executable: '/bin/bash'
+    chdir: '{{ steam__ctx._home }}'
+  changed_when: false
+  become: true
+  become_user: '{{ steam__ctx._user }}'
