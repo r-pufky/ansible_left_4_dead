@@ -90,7 +90,7 @@ molecule test --all
 
 Testing variables:
 
-  Variable          | type | Description
+  Variable          | Type | Description
  -------------------|------|-------------
   url_inject_enable | bool | Disable **get_url** to inject files locally.
 

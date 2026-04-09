@@ -19,10 +19,10 @@
 
       🗘 Updating ~7.5GB (~5 minutes @ 200Mbps). 🗘
 
-- name: '{{ "Update | steamcmd | update " ~ left_4_dead__srv._app_id }}'
+- name: '{{ "Update | steamcmd | update " ~ left_4_dead___release._app_id }}'
   ansible.builtin.shell: '{{
-      left_4_dead__cfg._steamcmd ~
-      "+app_update " ~ left_4_dead__srv._app_id ~ " " ~
+      left_4_dead___app._steamcmd ~
+      "+app_update " ~ left_4_dead___release._app_id ~ " " ~
       left_4_dead__srv._update_opts ~ " " ~
       "+quit"
     }}'
