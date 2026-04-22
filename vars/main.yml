@@ -35,6 +35,7 @@ left_4_dead___app: "{{ {} | r_pufky.data.v3(
     _admin_ini=(
       '/home/steam/left_4_dead/addons/sourcemod/configs/admins_simple.ini'
     ),
+    _update_server='/home/steam/left_4_dead/update_server',
     _steamcmd=(
       '/usr/games/steamcmd ' ~
       '+@sSteamCmdForcePlatformType ' ~ left_4_dead___release._platform ~
